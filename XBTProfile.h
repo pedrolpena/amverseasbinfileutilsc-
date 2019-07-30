@@ -116,7 +116,7 @@ public:
 	void setWindInstrumentType(int);
 	double getWindSpeed();
 	void setWindSpeed(double);
-	int getXbtLauncherType();
+	int getXBTLauncherType();
 	void setXBTLauncherType(int);
 	int getXBTProbeManufacturedDay();
 	void setXBTProbeManufacturedDay(int);
@@ -130,7 +130,7 @@ public:
 	void setXBTRecorderManufacturedMonth(int);
 	int getXBTRecorderManufacturedYear();
 	void setXBTRecorderManufacturedYear(int);
-	std::string getXbtRecorderSerialNumber();
+	std::string getXBTRecorderSerialNumber();
 	void setXBTRecorderSerialNumber(std::string);
 	int getYear();
 	void setYear(int);

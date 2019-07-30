@@ -494,7 +494,7 @@ void XBTProfile::setWindSpeed(double windSpeed ) {
 	this->windSpeed = windSpeed;
 }
 
-int XBTProfile::getXbtLauncherType()  {
+int XBTProfile::getXBTLauncherType()  {
 	return xbtLauncherType;
 }
 
@@ -550,7 +550,7 @@ void XBTProfile::setXBTRecorderManufacturedYear( int xbtRecorderManufactureYear 
 	this->xbtRecorderManufactureYear = xbtRecorderManufactureYear;
 }
 
- std::string XBTProfile::getXbtRecorderSerialNumber()  {
+ std::string XBTProfile::getXBTRecorderSerialNumber()  {
 	return xbtRecorderSerialNumber;
 }
 
@@ -600,8 +600,8 @@ std::string XBTProfile::toString() {
             + "Current Speed=" + std::to_string(getSeaSurfaceCurrentSpeed()) + "\n"
             + "Total water depth=" + std::to_string(getTotalWaterDepth()) + "\n"
             + "Agency Owner=" + std::to_string(getAgencyOwner()) + "\n"
-            + "XBT launcher type=" + std::to_string(getXbtLauncherType()) + "\n"
-            + "XBT Recorder Serial#=" + getXbtRecorderSerialNumber() + "\n"
+            + "XBT launcher type=" + std::to_string(getXBTLauncherType()) + "\n"
+            + "XBT Recorder Serial#=" + getXBTRecorderSerialNumber() + "\n"
             + "XBT Recorder Manufacture date=" + std::to_string(getXBTRecorderManufacturedMonth()) + "/" + std::to_string(getXBTRecorderManufacturedDay()) + "/" + std::to_string(this->getXBTRecorderManufacturedYear()) + "\n"
             + "XBT Probe Manufacture date=" + std::to_string(getXBTProbeManufacturedMonth()) + "/" + std::to_string(getXBTProbeManufacturedDay()) + "/" + std::to_string(getXBTProbeManufacturedYear()) + "\n"
             + "# of rider blocks=" + std::to_string(getNumberOfRiderBlocks()) + "\n"

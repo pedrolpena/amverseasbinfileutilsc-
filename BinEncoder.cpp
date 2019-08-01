@@ -15,7 +15,8 @@ BinEncoder::BinEncoder() {
 BinEncoder::BinEncoder(XBTProfile &xBTProfile) {
 
 	newMessageType = xBTProfile.getNewMessageType();
-	//encodeProfile(xBTProfile);
+	//bits = stdex::bitvector(32*4096);
+	encodeProfile(xBTProfile);
 }
 BinEncoder::~BinEncoder() {
 
@@ -46,18 +47,20 @@ stdex::bitvector BinEncoder::changeEndian(stdex::bitvector b) {
 
 void BinEncoder::setBitWithinBits(stdex::bitvector b, stdex::bitvector subBits, int startPos) {
 
-	if ( b.size() < subBits.size() + 1){   //make room for more bits
-		for( unsigned int l = 0 ; l <= subBits.size() ; l++){
-			b.push_back(0);
+	int bitsRange = startPos + subBits.size() + 1;
+	if ( bits.size() < bitsRange ){   //make room for more bits
+		int diff = bitsRange - bits.size();
+		for( unsigned int l = 0 ; l <= diff ; l++){
+			bits.push_back(0);
 		}//end for
 
 	}//end if
 
     for (unsigned int i = 0; i < subBits.size(); i++) {
         if (subBits.test(i)) {
-            b.set(i + startPos, true);
+        	bits.set(i + startPos, true);
         } else {
-            b.set(i + startPos, false);
+        	bits.set(i + startPos, false);
         }
     }
 }
@@ -105,7 +108,7 @@ void BinEncoder::integerToBits(stdex::bitvector b, int intValue, std::array<int,
  * where to insert the extracted bits.
  */
 void BinEncoder::stringToBits(stdex::bitvector b, std::string stringValue, std::array<int,2> range) {
-	if (range[0] == -1) {
+	if (range[0] == -1 || stringValue.size() < 1) {
          return;
      }
 
@@ -113,14 +116,14 @@ void BinEncoder::stringToBits(stdex::bitvector b, std::string stringValue, std::
 	int startPos = range[0];
 	int stringLength = stringValue.size();
 	stdex::bitvector bs;
-	bs = stdex::bitvector(stringLength);
-	char metaData;
+	bs = stdex::bitvector( 8 * stringLength );
+	char metaData='0';
 
-     for( unsigned int i = 0 ; i <  stringValue.size() ; i++){
+     for( unsigned int i = 0 ; i <  stringValue.length() ; i++){
 
     	 for( int j = 0; j < 8 ; j++){
     		 metaData = ( ( stringValue[i] >> j ) & 0x01 );
-    		 bs.set(startPos + i + j , (bool)metaData);
+    		 bs.set(8 * i + j , (bool)metaData);
     	 }//end for
 
 
@@ -164,8 +167,9 @@ void BinEncoder::encodeProfile(XBTProfile &xBTProfile) {
     int start0;
     std::array<int,2> range{-1, -1};
 
-    stringToBits(bits, xBTProfile.getWMOId(),XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::WMOID,newMessageType));
     integerToBits(bits, xBTProfile.getOldMessageType(), XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::OLD_MESSAGE_TYPE,newMessageType));
+
+    stringToBits(bits, xBTProfile.getWMOId(),XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::WMOID,newMessageType));
     integerToBits(bits, xBTProfile.getNewMessageType(), XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::NEW_MESSAGE_TYPE,newMessageType));
     double latitude = std::round(xBTProfile.getLatitude() * 100000.0 + 9000000);
     integerToBits(bits, (int)latitude, XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::LATITUDE,newMessageType));
@@ -344,4 +348,38 @@ void BinEncoder::encodeProfile(XBTProfile &xBTProfile) {
 
 
 
+}
+
+/**
+ * This method returns a string representation of the binary sequence in the
+ * specified range in the bin file.
+ *
+ * @param start the bit position from which to start constructing the binary
+ * sequence.
+ * @param end the bit position from which to stop construction the binary
+ * sequence.
+ * @return <strong>(FXY)</strong>-This method returns a string
+ * representation of the binary sequence in the specified range in the bin
+ * file.
+ */
+std::string BinEncoder::getBinarySequence(int start, int end) {
+	std::string str = "";
+    for (int i = start; i <= end; i++) {
+
+        if (bits.test(i)) {
+            str += "1";
+        }
+        if (!bits.test(i)) {
+            str += "0";
+        }
+        if ((i - start + 1) % 8 == 0) {
+            str += " ";
+        }
+
+    }//end for
+    return str;
+}
+
+int BinEncoder::getBitsSize(void) {
+	return bits.size();
 }

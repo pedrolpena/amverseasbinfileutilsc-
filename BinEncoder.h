@@ -28,6 +28,8 @@ public:
 	void stringToBits(stdex::bitvector, std::string,std::array<int,2>);
 	void encodeCommentBlocks(stdex::bitvector,std::string,std::array<int,2>,int);
 	void encodeProfile(XBTProfile &xBTProfile);
+	int getBitsSize(void);
+	std::string getBinarySequence(int, int);
 
 
 };

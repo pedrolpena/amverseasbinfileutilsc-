@@ -47,10 +47,10 @@ stdex::bitvector BinEncoder::changeEndian(stdex::bitvector b) {
 
 void BinEncoder::setBitWithinBits(stdex::bitvector b, stdex::bitvector subBits, int startPos) {
 
-	int bitsRange = startPos + subBits.size() + 1;
+	int bitsRange = startPos + subBits.size() ;
 	if ( bits.size() < bitsRange ){   //make room for more bits
 		int diff = bitsRange - bits.size();
-		for( unsigned int l = 0 ; l <= diff ; l++){
+		for( unsigned int l = 0 ; l < diff ; l++){
 			bits.push_back(0);
 		}//end for
 

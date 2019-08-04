@@ -7,16 +7,15 @@
 
 #include "BinEncoder.h"
 
+
+BinEncoder::BinEncoder(XBTProfile &xBTProfile) {
+	newMessageType = xBTProfile.getNewMessageType();
+	encodeProfile(xBTProfile);
+}
+
 BinEncoder::BinEncoder() {
 	newMessageType = 0;
 
-}
-
-BinEncoder::BinEncoder(XBTProfile &xBTProfile) {
-
-	newMessageType = xBTProfile.getNewMessageType();
-	//bits = stdex::bitvector(32*4096);
-	encodeProfile(xBTProfile);
 }
 BinEncoder::~BinEncoder() {
 
@@ -45,22 +44,22 @@ stdex::bitvector BinEncoder::changeEndian(stdex::bitvector b) {
     return b;
 }
 
-void BinEncoder::setBitWithinBits(stdex::bitvector b, stdex::bitvector subBits, int startPos) {
+void BinEncoder::setBitWithinBits(stdex::bitvector &b, stdex::bitvector &subBits, int startPos) {
 
-	int bitsRange = startPos + subBits.size() ;
-	if ( bits.size() < bitsRange ){   //make room for more bits
-		int diff = bitsRange - bits.size();
+	unsigned int bitsRange = startPos + subBits.size() ;
+	if ( b.size() < bitsRange ){   //make room for more bits
+		unsigned int diff = bitsRange - b.size();
 		for( unsigned int l = 0 ; l < diff ; l++){
-			bits.push_back(0);
+			b.push_back(0);
 		}//end for
 
 	}//end if
 
     for (unsigned int i = 0; i < subBits.size(); i++) {
         if (subBits.test(i)) {
-        	bits.set(i + startPos, true);
+        	b.set(i + startPos, true);
         } else {
-        	bits.set(i + startPos, false);
+        	b.set(i + startPos, false);
         }
     }
 }
@@ -73,7 +72,7 @@ void BinEncoder::setBitWithinBits(stdex::bitvector b, stdex::bitvector subBits, 
  * @param range an int[] that holds the start position and end position
  * where to insert the extracted bits.
  */
-void BinEncoder::integerToBits(stdex::bitvector b, int intValue, std::array<int,2> range) {
+void BinEncoder::integerToBits(stdex::bitvector &b, int intValue, std::array<int,2> range) {
     if (range[0] == -1) {
         return;
     }
@@ -107,8 +106,8 @@ void BinEncoder::integerToBits(stdex::bitvector b, int intValue, std::array<int,
  * @param range an int[] that holds the start position and end position
  * where to insert the extracted bits.
  */
-void BinEncoder::stringToBits(stdex::bitvector b, std::string stringValue, std::array<int,2> range) {
-	if (range[0] == -1 || stringValue.size() < 1) {
+void BinEncoder::stringToBits(stdex::bitvector &b, std::string stringValue, std::array<int,2> range) {
+	if (range[0] == -1 || stringValue.size() < 1 || stringValue.compare("") == 0  ) {
          return;
      }
 
@@ -144,12 +143,10 @@ void BinEncoder::stringToBits(stdex::bitvector b, std::string stringValue, std::
  * @param blocks The number of 40 bit blocks (5 characters) needed to encode
  * the string.
  */
-void BinEncoder::encodeCommentBlocks(stdex::bitvector b, std::string s, std::array<int,2> range, int blocks) {
+void BinEncoder::encodeCommentBlocks(stdex::bitvector &b, std::string s, std::array<int,2> range, int blocks) {
 	stdex::bitvector tmpBitSet;
-	tmpBitSet = stdex::bitvector(8 * s.size(),0);
+	tmpBitSet = stdex::bitvector(8 * s.size());
     tmpBitSet.set(8, true);
-    int sBytes = 2 * (8 * s.length()) % 40;
-    setBitWithinBits(b, tmpBitSet, range[0] + 40 * blocks + sBytes - 8);
     stringToBits(b, s, range);
 }
 /**
@@ -342,10 +339,55 @@ void BinEncoder::encodeProfile(XBTProfile &xBTProfile) {
 
     }
     xBTProfile.setNumberOfRiderPhoneBlocks(numberOfRiderPhoneBlocks);
+    // calculate bits needed to make BitSet a multiple of 8
+    unsigned int bitsNeeded =  std::abs(8 * (int)std::ceil(((double)getBitsSize())/(8.0)) - getBitsSize()) ;
 
+    //calculate space left to fill for unsed part of last character block and add zeros
 
+    unsigned int emptySpaces = 8;
+    bool fillSet = false;
 
+    //Type 1 and Type 2 messages seem were terminated differently
+    if (newMessageType == MessageType::MESSAGE_TYPE_1 || newMessageType == MessageType::MESSAGE_TYPE_2)
+    {
+    	emptySpaces = 0;
+    	fillSet = true;
+    }
 
+    if (numberOfRiderPhoneBlocks > 0){
+    	emptySpaces =  8 * ( 5 * numberOfRiderPhoneBlocks - xBTProfile.getRiderPhones().length() ) ;
+    }
+
+    //fill the BitSet
+    for(unsigned int i = 0 ; i < bitsNeeded + emptySpaces; i++){
+    	bits.push_back(fillSet);
+    }
+
+   // Messages are terminated with a 1 so make the last bit a 1
+
+   bits.set( bits.size() -1 , true);
+   std::ofstream fout;
+   fout.open("/home/pedro/Downloads/src/amverseasbinfileutils/out.bin", std::ios::binary | std::ios::out);
+   char temp=0x00;
+   char bit = 0x00;
+
+   for(int i = 0 ; i < getBitsSize() ; i++){
+		if (bits.test(i)) {
+			bit = 0x01;
+		}
+		else {
+			bit = 0x00;
+		}
+		temp = temp << 1;
+		temp |= bit;
+
+		if ( ( i + 1 ) % 8 == 0 ) {
+			fout.write(&temp,1);
+			temp = 0;
+		}//end if
+   }//end for
+
+   fout.close();
 
 
 }
@@ -382,4 +424,13 @@ std::string BinEncoder::getBinarySequence(int start, int end) {
 
 int BinEncoder::getBitsSize(void) {
 	return bits.size();
+}
+
+/**
+ * This method calculates the CRC32 value or SEAS ID for the profile and
+ * stores it in the profile.
+ *
+ * @param b the BitSet object that holds the profile.
+ */
+void BinEncoder::setMessageCRC(stdex::bitvector b) {
 }

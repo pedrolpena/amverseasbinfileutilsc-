@@ -200,7 +200,7 @@ std::string BinDecoder::getBinarySequence(int start, int end) {
 std::string BinDecoder::toString(int start, int end) {
 
 	if (start < 0 || end < 0 || end - start <= 0) {
-		return "null";
+		return "";
 	}
 
 	std::string str = "";
@@ -1166,4 +1166,8 @@ void BinDecoder::decodeXBTProfile(XBTProfile &xBTProfile) {
     xBTProfile.setYear(getYear());
 
     //return *xBTProfile;
+}
+
+int BinDecoder::getBitsSize() {
+	return bits.size();
 }

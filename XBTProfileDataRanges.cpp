@@ -58,7 +58,7 @@ constexpr int dataLocations[56][2][5] = {
     /*43*/ {{  -1,  -1,  -1, 849, 849 }, {  -1,  -1, -1,  854, 854 }},// number of rider institution blocks
     /*44*/ {{  -1,  -1,  -1, 855, 855 }, {  -1,  -1, -1,  860, 860 }},// number of rider email blocks
     /*45*/ {{  -1,  -1,  -1, 861, 861 }, {  -1,  -1, -1,  866, 866 }},// number of rider phone blocks
-    /*46*/ {{  -1, 597, 707, 867, 867 }, {  -1,  04, 714, 874, 874 }},// number of repeated fields
+    /*46*/ {{  -1, 597, 707, 867, 867 }, {  -1, 604, 714, 874, 874 }},// number of repeated fields
     /*47*/ {{  -1, 605, 715, 875, 875 }, {  -1, 620, 730, 890, 890 }},// times replicated
     /*48*/ {{  -1, 621, 731, 891, 891 }, {  -1, 632, 742, 902, 911 }},// sea surface temperature/resistance
     /*49*/ {{  -1, 633,  -1,  -1,  -1 }, {  -1, 646,  -1,  -1,  -1 }},// sea depth

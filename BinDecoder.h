@@ -87,6 +87,7 @@ public:
 	std::string getXBTRecorderSerialNumber();
 	int getYear();
 	void decodeXBTProfile(XBTProfile &xBTProfile);
+	int getBitsSize();
 
 
 

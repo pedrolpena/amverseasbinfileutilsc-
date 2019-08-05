@@ -342,12 +342,13 @@ void BinEncoder::encodeProfile(XBTProfile &xBTProfile) {
     // calculate bits needed to make BitSet a multiple of 8
     unsigned int bitsNeeded =  std::abs(8 * (int)std::ceil(((double)getBitsSize())/(8.0)) - getBitsSize()) ;
 
-    //calculate space left to fill for unsed part of last character block and add zeros
+    //calculate space left to fill for unsed part of last character block and some padding
+    //type 1 and 2 messages are padded with ones and the rest are padded with zeros.
 
     unsigned int emptySpaces = 8;
     bool fillSet = false;
 
-    //Type 1 and Type 2 messages seem were terminated differently
+    //Type 1 and Type 2 messages were terminated differently
     if (newMessageType == MessageType::MESSAGE_TYPE_1 || newMessageType == MessageType::MESSAGE_TYPE_2)
     {
     	emptySpaces = 0;
@@ -358,7 +359,7 @@ void BinEncoder::encodeProfile(XBTProfile &xBTProfile) {
     	emptySpaces =  8 * ( 5 * numberOfRiderPhoneBlocks - xBTProfile.getRiderPhones().length() ) ;
     }
 
-    //fill the BitSet
+    //pad the BitSet
     for(unsigned int i = 0 ; i < bitsNeeded + emptySpaces; i++){
     	bits.push_back(fillSet);
     }
@@ -366,28 +367,8 @@ void BinEncoder::encodeProfile(XBTProfile &xBTProfile) {
    // Messages are terminated with a 1 so make the last bit a 1
 
    bits.set( bits.size() -1 , true);
-   std::ofstream fout;
-   fout.open("/home/pedro/Downloads/src/amverseasbinfileutils/out.bin", std::ios::binary | std::ios::out);
-   char temp=0x00;
-   char bit = 0x00;
 
-   for(int i = 0 ; i < getBitsSize() ; i++){
-		if (bits.test(i)) {
-			bit = 0x01;
-		}
-		else {
-			bit = 0x00;
-		}
-		temp = temp << 1;
-		temp |= bit;
 
-		if ( ( i + 1 ) % 8 == 0 ) {
-			fout.write(&temp,1);
-			temp = 0;
-		}//end if
-   }//end for
-
-   fout.close();
 
 
 }
@@ -432,5 +413,71 @@ int BinEncoder::getBitsSize(void) {
  *
  * @param b the BitSet object that holds the profile.
  */
-void BinEncoder::setMessageCRC(stdex::bitvector b) {
+void BinEncoder::setMessageCRC(stdex::bitvector &b) {
+
+	integerToBits(b, 0xFFFFFFFF,XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::UNIQUE_TAG, newMessageType));
+    b = changeEndian(b);
+	uint8_t x = 0;
+	uint8_t buf[b.size()/8]={0};
+	uint32_t crc;
+	for (unsigned int i = 0; i < b.size(); i++) {
+
+		x = x << 1 ;
+		x |= b.test(i);
+
+		if ((i + 1) % 8 == 0){
+			buf[(i+1)/8] = x;
+			x=0;
+		}
+
+	}//end for
+
+
+	crc = CRC32_function(buf, b.size()/8);
+	b = changeEndian(b);
+
+	integerToBits(b, crc, XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::UNIQUE_TAG, newMessageType));
 }
+
+/**
+ * This method accepts a String representing the filename that will be used
+ * to create the binary file.
+ *
+ * @param outputFile the filename that will be used to create the binary
+ * file.
+ */
+void BinEncoder::writeOutBinFile(std::string outputFile) {
+	//setMessageCRC(bits);
+	std::ofstream fos;
+	fos.open(outputFile, std::ios::binary | std::ios::out);
+	char temp = 0;
+
+	for (int i = 0; i < getBitsSize(); i++) {
+
+		temp = temp << 1;
+		temp |= bits.test(i);
+
+		if ((i + 1) % 8 == 0) {
+			fos.write(&temp, 1);
+		}    //end if
+	}    //end for
+
+	fos.close();
+}
+
+uint32_t BinEncoder::CRC32_function(uint8_t *buf, uint32_t len) {
+    uint32_t val, crc;
+    uint8_t i;
+
+    crc = 0xFFFFFFFF;
+    while(len--){
+        val=(crc^*buf++)&0xFF;
+        for(i=0; i<8; i++){
+            val = val & 1 ? (val>>1)^POLY : val>>1;
+        }
+        crc = val^crc>>8;
+    }
+    return crc^0xFFFFFFFF;
+}
+
+

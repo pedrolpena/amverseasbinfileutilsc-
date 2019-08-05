@@ -11,9 +11,13 @@
 #include <array>
 #include <cmath>
 #include <fstream>
+#include <array>
 
 #ifndef BINENCODER_H_
 #define BINENCODER_H_
+// CRC-32C (iSCSI) polynomial in reversed bit order.
+//#define POLY 0x82f63b78
+#define POLY 0xedb88320
 
 class BinEncoder {
 public:
@@ -31,7 +35,10 @@ public:
 	void encodeProfile(XBTProfile &xBTProfile);
 	int getBitsSize(void);
 	std::string getBinarySequence(int, int);
-	void setMessageCRC(stdex::bitvector);
+	void setMessageCRC(stdex::bitvector &b);
+	void writeOutBinFile(std::string outputFile);
+	uint32_t CRC32_function(uint8_t *buf, uint32_t len);
+
 
 
 };

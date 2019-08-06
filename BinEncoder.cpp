@@ -416,25 +416,23 @@ int BinEncoder::getBitsSize(void) {
 void BinEncoder::setMessageCRC(stdex::bitvector &b) {
 
 	integerToBits(b, 0xFFFFFFFF,XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::UNIQUE_TAG, newMessageType));
-    b = changeEndian(b);
 	uint8_t x = 0;
-	uint8_t buf[b.size()/8]={0};
+	char buf[b.size()/8]={0};
 	uint32_t crc;
+
 	for (unsigned int i = 0; i < b.size(); i++) {
 
-		x = x << 1 ;
+        x = x << 1 ;
 		x |= b.test(i);
 
 		if ((i + 1) % 8 == 0){
-			buf[(i+1)/8] = x;
+			buf[i/8] = x;
 			x=0;
 		}
 
 	}//end for
 
-
-	crc = CRC32_function(buf, b.size()/8);
-	b = changeEndian(b);
+	crc = computeCRC32(buf,b.size()/8);
 
 	integerToBits(b, crc, XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::UNIQUE_TAG, newMessageType));
 }
@@ -447,7 +445,7 @@ void BinEncoder::setMessageCRC(stdex::bitvector &b) {
  * file.
  */
 void BinEncoder::writeOutBinFile(std::string outputFile) {
-	//setMessageCRC(bits);
+	setMessageCRC(bits);
 	std::ofstream fos;
 	fos.open(outputFile, std::ios::binary | std::ios::out);
 	char temp = 0;
@@ -465,7 +463,15 @@ void BinEncoder::writeOutBinFile(std::string outputFile) {
 	fos.close();
 }
 
-uint32_t BinEncoder::CRC32_function(uint8_t *buf, uint32_t len) {
+
+/**
+ * This method calculates the CRC32 lookup table on the fly
+ * and returns the checksum. This way is slower but it's
+ * easier to read. This method was posted on stackoverflow
+ * https://stackoverflow.com/questions/26049150/calculate-a-32-bit-crc-lookup-table-in-c-c
+ */
+uint32_t BinEncoder::computeCRC32(char *buf, uint32_t len) {
+
     uint32_t val, crc;
     uint8_t i;
 
@@ -473,11 +479,9 @@ uint32_t BinEncoder::CRC32_function(uint8_t *buf, uint32_t len) {
     while(len--){
         val=(crc^*buf++)&0xFF;
         for(i=0; i<8; i++){
-            val = val & 1 ? (val>>1)^POLY : val>>1;
+            val = val & 1 ? (val>>1)^0xEDB88320 : val>>1;
         }
         crc = val^crc>>8;
     }
     return crc^0xFFFFFFFF;
 }
-
-

@@ -339,41 +339,45 @@ void BinEncoder::encodeProfile(XBTProfile &xBTProfile) {
 
     }
     xBTProfile.setNumberOfRiderPhoneBlocks(numberOfRiderPhoneBlocks);
-    // calculate bits needed to make BitSet a multiple of 40
-    unsigned int bitsNeeded =  0;
+    // calculate bits needed to make BitSet a multiple of 8
+    unsigned int bitsNeeded =  std::abs(8 * (int)std::ceil(((double)getBitsSize())/(8.0)) - getBitsSize());
 
-    //calculate space left to fill for unsed part of last character block and some padding
-    //type 1 and 2 messages are padded with ones and the rest are padded with zeros.
-
-    unsigned int emptySpaces = 0;
-    bool fillSet = false;
-
-    //Type 1 and Type 2 messages were terminated differently
-    if (newMessageType == MessageType::MESSAGE_TYPE_1 || newMessageType == MessageType::MESSAGE_TYPE_2)
-    {
-    	bitsNeeded =  std::abs(8 * (int)std::ceil(((double)getBitsSize())/(8.0)) - getBitsSize()) ;
-    	emptySpaces = 0;
-    	fillSet = true;
-    }
-    else{
-
-    	bitsNeeded =  std::abs(40 * (int)std::ceil(((double)getBitsSize())/(40.0)) - getBitsSize()) ;
-
-    }
-
-    if (numberOfRiderPhoneBlocks > 0){
-    	emptySpaces =  8 * ( 5 * numberOfRiderPhoneBlocks - xBTProfile.getRiderPhones().length() ) ;
-    }
+//    //calculate space left to fill for unsed part of last character block and some padding
+//    //type 1 and 2 messages are padded with ones and the rest are padded with zeros.
+//
+//    unsigned int emptySpaces = 0;
+//    bool fillSet = false;
+//
+//    //Type 1 and Type 2 messages were terminated differently
+//    if (newMessageType == MessageType::MESSAGE_TYPE_1 || newMessageType == MessageType::MESSAGE_TYPE_2)
+//    {
+//    	bitsNeeded =  std::abs(8 * (int)std::ceil(((double)getBitsSize())/(8.0)) - getBitsSize()) ;
+//    	emptySpaces = 0;
+//    	fillSet = true;
+//    }
+//    else{
+//
+//    	bitsNeeded =  std::abs(40 * (int)std::ceil(((double)getBitsSize())/(40.0)) - getBitsSize()) ;
+//
+//    }
+//
+//    if (numberOfRiderPhoneBlocks > 0){
+//    	emptySpaces =  8 * ( 5 * numberOfRiderPhoneBlocks - xBTProfile.getRiderPhones().length() ) ;
+//    }
+//
+//    //pad the BitSet
+//    for(unsigned int i = 0 ; i < bitsNeeded + emptySpaces; i++){
+//    	bits.push_back(false);
+//    }
+//
+//   // Messages are terminated with a 1 so make the last bit a 1
+//
+//   bits.set( bits.size() -1 , true);
 
     //pad the BitSet
-    for(unsigned int i = 0 ; i < bitsNeeded + emptySpaces; i++){
-    	bits.push_back(fillSet);
+    for(unsigned int i = 0 ; i < bitsNeeded ; i++){
+    	bits.push_back(true);
     }
-
-   // Messages are terminated with a 1 so make the last bit a 1
-
-   bits.set( bits.size() -1 , true);
-
 
 
 

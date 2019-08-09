@@ -13,6 +13,7 @@
 #include "XBTProbe.h"
 #include "XBTRecorder.h"
 #include "XBTProfile.h"
+#include "mlinterp.h"
 
 class DepthCalculator {
 public:
@@ -83,6 +84,29 @@ public:
      *
      */
     DepthCalculator(XBTProfile &xBTProfile, int recorderType, int probeType);
+
+
+    /**
+     * This method returns a two dimensional array of doubles containing the
+     * depths ad temperatures with a resolution of two meters. A linear
+     * interpolation is performed to get the depths at 1 meter increments.
+     *
+     * @return returns a two dimensional array of doubles containing the depths
+     * ad temperatures with a resolution of two meters. A linear interpolation
+     * is performed to get the depths at 1 meter increments.
+     */
+    std::vector<std::vector<double>> getDepthsAndTemperaturePointsOneMeterResolution();
+
+    /**
+     * This method returns a two dimensional array of doubles containing the
+     * depths ad temperatures with a resolution of two meters. A linear
+     * interpolation is performed to get the depths at 2 meter increments.
+     *
+     * @return returns a two dimensional array of doubles containing the depths
+     * ad temperatures with a resolution of two meters. A linear interpolation
+     * is performed to get the depths at 2 meter increments.
+     */
+    std::vector<std::vector<double>> getDepthsAndTemperaturePointsTwoMeterResolution();
 
     DepthCalculator(XBTProfile &xBTProfile);
 

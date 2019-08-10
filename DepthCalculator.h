@@ -8,7 +8,10 @@
 #ifndef DEPTHCALCULATOR_H_
 #define DEPTHCALCULATOR_H_
 
+
 #include <vector>
+#include <cmath>
+#include <algorithm>
 
 #include "XBTProbe.h"
 #include "XBTRecorder.h"
@@ -22,6 +25,7 @@ public:
 	double sampleFrequency = 10.0;
 	int numberOfMeasurements = 0;
 	XBTProfile xBTProfile;
+
 
     /**
      * This method sets the coefficients used by the XBT fall rate equation to
@@ -107,6 +111,22 @@ public:
      * is performed to get the depths at 2 meter increments.
      */
     std::vector<std::vector<double>> getDepthsAndTemperaturePointsTwoMeterResolution();
+
+
+	std::vector<std::vector<double>> getDepthsAndTemperaturePointsInflectionPoints();
+
+    //===========stuff from jjvv_1=========
+
+
+    #define MAXINFPTS 30
+
+	int    ComputeLastDepth();
+    void   ApplyMedianFilter( std::vector <double> *s );
+    double GetMedian(std::vector<double> *pts);
+    int    ComputeTailDepth();
+    double GetSmoothTempAtDepth(int Depth, std::vector <double> *s);
+
+    //=====================================
 
     DepthCalculator(XBTProfile &xBTProfile);
 

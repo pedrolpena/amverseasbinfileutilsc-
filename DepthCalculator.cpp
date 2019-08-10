@@ -183,7 +183,11 @@ std::vector<std::vector<double> > DepthCalculator::getDepthsAndTemperaturePoints
 std::vector<std::vector<double> > DepthCalculator::getDepthsAndTemperaturePointsTwoMeterResolution() {
 	std::vector<std::vector<double> > depthsAndTemps =
 			getDepthsAndTemperaturePointsOneMeterResolution();
-	int finalDepth = (int) depthsAndTemps[depthsAndTemps.size() - 1][0];
+
+	int finalDepth = 0;
+	if (!depthsAndTemps.empty()) {
+		finalDepth = (int) depthsAndTemps[depthsAndTemps.size() - 1][0];
+	}
 
 	if (finalDepth % 2 != 0) {
 		finalDepth--;
@@ -200,4 +204,306 @@ std::vector<std::vector<double> > DepthCalculator::getDepthsAndTemperaturePoints
 
 	return depthsAndTempsTwoMeterResolution;
 
+}
+
+std::vector<std::vector<double>> DepthCalculator::getDepthsAndTemperaturePointsInflectionPoints() {
+
+	std::vector<std::vector<double>> Inflections;
+	std::vector <double> *smoothedPoints = new std::vector<double>(0);
+
+	if (ComputeLastDepth() < 5) {
+		return Inflections;
+	}
+
+	//if (!Smoothed) {
+		ApplyMedianFilter(smoothedPoints);
+	//}
+
+	int td = ComputeTailDepth();
+
+	float q = (float) 0.15;
+
+	std::vector<double> junk;
+
+	while (q < 2.0) //910
+	{
+		bool CompNewLimits = false;
+		Inflections.clear();
+
+		double t1 = GetSmoothTempAtDepth(2,smoothedPoints);
+		double d1 = 2.0;
+
+		junk.clear();
+		junk.push_back(d1);
+		junk.push_back(t1);
+		Inflections.push_back(junk);
+
+		float t2 = GetSmoothTempAtDepth(3,smoothedPoints);
+		float d2 = 3.0;
+
+		float deltat = t2 - t1;
+		float deltad = d2 - d1;
+		float lsr = (deltat + q) / deltad;  // right limiting slope
+		float lsl = (deltat - q) / deltad;	// Left limiting slope
+
+		int i;
+		for (i = 4; i < td; i++) //930
+				{
+
+			t2 = GetSmoothTempAtDepth(i,smoothedPoints);
+
+			d2 = i;
+			if (d1 > td) {
+				break;
+			}
+			float Ndeltat = t2 - t1;
+			float Ndeltad = d2 - d1;
+			if (CompNewLimits) {
+				lsr = (Ndeltat + q) / Ndeltad;
+				lsl = (Ndeltat - q) / Ndeltad;
+				CompNewLimits = false;
+			}
+
+			float Tslope = Ndeltat / Ndeltad;
+			if (Tslope > lsr) {
+
+				t1 = t2;
+				d1 = d2;
+
+				junk.clear();
+				junk.push_back(d1);
+				junk.push_back(t1);
+				Inflections.push_back(junk);
+
+				CompNewLimits = true;
+				continue;
+			}
+
+			if (Tslope < lsl) {
+
+				t1 = t2;
+				d1 = d2;
+
+				junk.clear();
+				junk.push_back(d1);
+				junk.push_back(t1);
+				Inflections.push_back(junk);
+				CompNewLimits = true;
+				continue;
+			}
+			Tslope = (Ndeltat + q) / Ndeltad;
+			if (Tslope < lsr) {
+				lsr = Tslope;
+			}
+
+			Tslope = (Ndeltat - q) / Ndeltad;
+			if (Tslope > lsl) {
+				lsl = Tslope;
+			}
+
+		}
+
+		if (Inflections.size() < MAXINFPTS) {
+
+			junk.clear();
+			junk.push_back(td);
+			junk.push_back(GetSmoothTempAtDepth(td,smoothedPoints));
+			Inflections.push_back(junk);
+
+			for (unsigned int i = 0; i < Inflections.size() - 1; i++) {
+
+				std::vector<double> first;
+				std::vector<double> next;
+
+				first = Inflections.at(i);
+				next = Inflections.at(i + 1);
+
+				if (first[0] == next[0]) {
+					Inflections.erase(Inflections.begin() + (i + 1));
+				}
+
+			}
+			int k = Inflections.size();
+			for (i = 0; i < k - 2; i++) {
+				std::vector<double> first, secnd, last;
+
+				first = Inflections.at(i);
+				while (1) {
+					if ((i + 2) <= (k - 1)) {
+
+						secnd = Inflections.at(i + 1);
+
+						last = Inflections.at(i + 2);
+					} else {
+						break;
+					}
+
+					int T1, T2, T3;
+					T1 = (int) ((first[1] + .05) * 10.0);
+					T2 = (int) ((secnd[1] + .05) * 10.0);
+					T3 = (int) ((last[1] + .05) * 10.0);
+
+					if ((T1 == T2) && (T2 == T3)) {
+
+						Inflections.erase(Inflections.begin() + (i + 1));
+						k = Inflections.size();
+					} else {
+						break;
+					}
+				}
+
+				if ((i + 2) <= (k - 1)) {
+					continue;
+				} else {
+					break;
+				}
+
+			}
+
+			return Inflections;
+		} else {
+
+			q = q * 1.10;
+		}
+
+	} //end while
+
+	return Inflections;
+}
+
+
+
+
+
+int DepthCalculator::ComputeLastDepth() {
+
+	int RetDepth = -1;
+	double depth =
+			this->getDepthsAndTemperaturePoints()[getDepthsAndTemperaturePoints().size()
+					- 1][0];
+
+	RetDepth = (int) depth;
+
+	return RetDepth;
+
+}
+
+void DepthCalculator::ApplyMedianFilter(std::vector <double> *s) {
+	int Nopts = 0;
+	std::vector<double> Pts;
+	std::vector<double>* smoothedPoints = s;
+	smoothedPoints->clear();
+
+	std::vector<double> temps(getDepthsAndTemperaturePoints().size());
+	for (unsigned int i = 0; i < getDepthsAndTemperaturePoints().size(); i++) {
+		temps[i] = this->getDepthsAndTemperaturePoints()[i][1];
+	}
+
+	int i;
+	for (i = 1; i < (int) temps.size() - 1; i++) {
+		int PtsSize = temps.size() - 1;
+		Pts.clear();
+		if ((i - 5 >= 0) && (i + 5 <= PtsSize)) {
+			Nopts = 5;
+		} else if ((i - 4 >= 0) && (i + 4 <= PtsSize)) {
+			Nopts = 4;
+		} else if ((i - 3 >= 0) && (i + 3 <= PtsSize)) {
+			Nopts = 3;
+		} else if ((i - 2 >= 0) && (i + 2 <= PtsSize)) {
+			Nopts = 2;
+		} else {
+			Nopts = 1;
+		}
+
+		if (i > 1561) {
+
+		}
+		for (int k = i - Nopts; k < i + (Nopts + 1); k++) {
+			Pts.push_back(temps[k]);
+
+		}
+
+		smoothedPoints->push_back(GetMedian(&Pts));
+	}
+
+	for (i = (int) smoothedPoints->size() - 1; i > 1; i--)   // Paul's Error
+			{
+		float temp = smoothedPoints->at(i);
+		if ((temp >= 35.5)) {
+
+			smoothedPoints->erase(smoothedPoints->begin() + i);
+			continue;
+		}
+		break;
+	}
+	//Smoothed = true;
+}
+
+double DepthCalculator::GetMedian(std::vector<double> *pts) {
+
+	std::vector<double> mytemps;
+
+	for (unsigned int i = 0; i < pts->size(); i++) {
+		float x = pts->at(i);
+		mytemps.push_back(x);
+	}
+	std::sort(mytemps.begin(), mytemps.end());
+	return mytemps.at(mytemps.size() / 2);
+}
+
+int DepthCalculator::ComputeTailDepth() {
+
+	int TailDepth = -1;
+
+	double t2;
+
+	std::vector<std::vector<double> > depthsAndTemps;
+
+	depthsAndTemps = getDepthsAndTemperaturePointsOneMeterResolution();
+
+	TailDepth = depthsAndTemps.size();
+	int k = TailDepth;
+
+	for (int i = k; i > 0; i--) {
+
+		t2 = depthsAndTemps[i - 1][1];
+		if (t2 == 35.5)
+			continue;
+
+		TailDepth = i;
+
+		//TailsRem = true;
+		break;
+	}
+
+	return TailDepth;
+
+}
+
+double DepthCalculator::GetSmoothTempAtDepth(int Depth,std::vector <double> *s) {
+	double RetTemp = (double) -9999;
+	std::vector <double>* smoothedPoints = s;
+	if (Depth >= 1) {
+
+		double a = .001 * B;
+		double b = A;
+		double c = -Depth;
+		double x1 = std::sqrt(b * b - 4.0 * a * c);
+		double tim1 = (-b + x1) / (2.0 * a) * 10.0;
+		unsigned int pos;
+		double pos1;
+		double remain = std::modf(tim1, &pos1);
+		pos = (int) pos1;
+		if (pos <= smoothedPoints->size() - 1)
+
+		{
+			float tb = smoothedPoints->at(pos - 1);
+			float tt = smoothedPoints->at(pos);
+			float dif = tt - tb;
+			RetTemp = (tb + dif * remain);
+
+		}
+
+	}
+	return (float) RetTemp;
 }

@@ -113,7 +113,15 @@ public:
      */
     std::vector<std::vector<double>> getDepthsAndTemperaturePointsTwoMeterResolution();
 
-
+    /**
+     * This method returns a two dimensional array of doubles containing the
+     * depths and temperatures for the inflection points in the profile.
+     * The algorithm used in this method was adapted from Paul Chinn's code
+     * in JJVV_1.CPP.
+     *
+     * @return returns a two dimensional array of doubles containing the depths
+     * and temperatures for the inflection points in the profile.
+     */
 	std::vector<std::vector<double>> getDepthsAndTemperaturePointsInflectionPoints();
 
 	DepthCalculator(XBTProfile &xBTProfile);

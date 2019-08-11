@@ -206,6 +206,16 @@ std::vector<std::vector<double> > DepthCalculator::getDepthsAndTemperaturePoints
 
 }
 
+
+/**
+ * This method returns a two dimensional array of doubles containing the
+ * depths and temperatures for the inflection points in the profile.
+ * The algorithm used in this method was adapted from Paul Chinn's code
+ * in JJVV_1.CPP.
+ *
+ * @return returns a two dimensional array of doubles containing the depths
+ * and temperatures for the inflection points in the profile.
+ */
 std::vector<std::vector<double>> DepthCalculator::getDepthsAndTemperaturePointsInflectionPoints() {
 
 	std::vector<std::vector<double>> Inflections;
@@ -415,7 +425,7 @@ void DepthCalculator::ApplyMedianFilter(std::vector <double> *s) {
 	for (i = (int) smoothedPoints->size() - 1; i > 1; i--)   // Paul's Error
 			{
 		double temp = smoothedPoints->at(i);
-		if ((temp >= 34.5)) {
+		if ((temp >= 34.5)) { // changed from 35.5
 
 			smoothedPoints->erase(smoothedPoints->begin() + i);
 			continue;
@@ -454,7 +464,7 @@ int DepthCalculator::ComputeTailDepth() {
 
 		t1 = depthsAndTemps[i][1];
 		t2 = depthsAndTemps[i - 1][1];
-		if (t2 >= 34.5)
+		if (t2 >= 34.5) // changed from 35.5
 			continue;
 
 		DeltaT = t1 - t2;

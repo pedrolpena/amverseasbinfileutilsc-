@@ -209,36 +209,38 @@ std::vector<std::vector<double> > DepthCalculator::getDepthsAndTemperaturePoints
 std::vector<std::vector<double>> DepthCalculator::getDepthsAndTemperaturePointsInflectionPoints() {
 
 	std::vector<std::vector<double>> Inflections;
-	std::vector <double> *smoothedPoints = new std::vector<double>(0);
+	std::vector<double> *smoothedPoints = new std::vector<double>(0);
 
-	if (ComputeLastDepth() < 5) {
+	int lastDepth =
+			(int) getDepthsAndTemperaturePoints()[getDepthsAndTemperaturePoints().size()
+					- 1][0];
+
+	if (lastDepth < 5) {
 		return Inflections;
 	}
 
-	//if (!Smoothed) {
-		ApplyMedianFilter(smoothedPoints);
-	//}
+	ApplyMedianFilter(smoothedPoints);
 
 	int td = ComputeTailDepth();
 
 	float q = (float) 0.15;
 
-	std::vector<double> junk;
+	std::vector<double> IPdata;
 
 	while (q < 2.0) //910
 	{
 		bool CompNewLimits = false;
 		Inflections.clear();
 
-		double t1 = GetSmoothTempAtDepth(2,smoothedPoints);
+		double t1 = GetSmoothTempAtDepth(2, smoothedPoints);
 		double d1 = 2.0;
 
-		junk.clear();
-		junk.push_back(d1);
-		junk.push_back(t1);
-		Inflections.push_back(junk);
+		IPdata.clear();
+		IPdata.push_back(d1);
+		IPdata.push_back(t1);
+		Inflections.push_back(IPdata);
 
-		float t2 = GetSmoothTempAtDepth(3,smoothedPoints);
+		float t2 = GetSmoothTempAtDepth(3, smoothedPoints);
 		float d2 = 3.0;
 
 		float deltat = t2 - t1;
@@ -250,7 +252,7 @@ std::vector<std::vector<double>> DepthCalculator::getDepthsAndTemperaturePointsI
 		for (i = 4; i < td; i++) //930
 				{
 
-			t2 = GetSmoothTempAtDepth(i,smoothedPoints);
+			t2 = GetSmoothTempAtDepth(i, smoothedPoints);
 
 			d2 = i;
 			if (d1 > td) {
@@ -270,10 +272,10 @@ std::vector<std::vector<double>> DepthCalculator::getDepthsAndTemperaturePointsI
 				t1 = t2;
 				d1 = d2;
 
-				junk.clear();
-				junk.push_back(d1);
-				junk.push_back(t1);
-				Inflections.push_back(junk);
+				IPdata.clear();
+				IPdata.push_back(d1);
+				IPdata.push_back(t1);
+				Inflections.push_back(IPdata);
 
 				CompNewLimits = true;
 				continue;
@@ -284,10 +286,10 @@ std::vector<std::vector<double>> DepthCalculator::getDepthsAndTemperaturePointsI
 				t1 = t2;
 				d1 = d2;
 
-				junk.clear();
-				junk.push_back(d1);
-				junk.push_back(t1);
-				Inflections.push_back(junk);
+				IPdata.clear();
+				IPdata.push_back(d2);
+				IPdata.push_back(t2);
+				Inflections.push_back(IPdata);
 				CompNewLimits = true;
 				continue;
 			}
@@ -305,15 +307,14 @@ std::vector<std::vector<double>> DepthCalculator::getDepthsAndTemperaturePointsI
 
 		if (Inflections.size() < MAXINFPTS) {
 
-			junk.clear();
-			junk.push_back(td);
-			junk.push_back(GetSmoothTempAtDepth(td,smoothedPoints));
-			Inflections.push_back(junk);
+			IPdata.clear();
+			IPdata.push_back(td);
+			IPdata.push_back(GetSmoothTempAtDepth(td, smoothedPoints));
+			Inflections.push_back(IPdata);
 
 			for (unsigned int i = 0; i < Inflections.size() - 1; i++) {
 
-				std::vector<double> first;
-				std::vector<double> next;
+				std::vector<double> first, next;
 
 				first = Inflections.at(i);
 				next = Inflections.at(i + 1);
@@ -372,22 +373,6 @@ std::vector<std::vector<double>> DepthCalculator::getDepthsAndTemperaturePointsI
 }
 
 
-
-
-
-int DepthCalculator::ComputeLastDepth() {
-
-	int RetDepth = -1;
-	double depth =
-			this->getDepthsAndTemperaturePoints()[getDepthsAndTemperaturePoints().size()
-					- 1][0];
-
-	RetDepth = (int) depth;
-
-	return RetDepth;
-
-}
-
 void DepthCalculator::ApplyMedianFilter(std::vector <double> *s) {
 	int Nopts = 0;
 	std::vector<double> Pts;
@@ -395,7 +380,7 @@ void DepthCalculator::ApplyMedianFilter(std::vector <double> *s) {
 	smoothedPoints->clear();
 
 	std::vector<double> temps(getDepthsAndTemperaturePoints().size());
-	for (unsigned int i = 0; i < getDepthsAndTemperaturePoints().size(); i++) {
+	for (unsigned int i = 0; i < getDepthsAndTemperaturePoints().size() - 1; i++) {
 		temps[i] = this->getDepthsAndTemperaturePoints()[i][1];
 	}
 
@@ -423,13 +408,14 @@ void DepthCalculator::ApplyMedianFilter(std::vector <double> *s) {
 
 		}
 
+
 		smoothedPoints->push_back(GetMedian(&Pts));
 	}
 
 	for (i = (int) smoothedPoints->size() - 1; i > 1; i--)   // Paul's Error
 			{
-		float temp = smoothedPoints->at(i);
-		if ((temp >= 35.5)) {
+		double temp = smoothedPoints->at(i);
+		if ((temp >= 34.5)) {
 
 			smoothedPoints->erase(smoothedPoints->begin() + i);
 			continue;
@@ -444,7 +430,7 @@ double DepthCalculator::GetMedian(std::vector<double> *pts) {
 	std::vector<double> mytemps;
 
 	for (unsigned int i = 0; i < pts->size(); i++) {
-		float x = pts->at(i);
+		double x = pts->at(i);
 		mytemps.push_back(x);
 	}
 	std::sort(mytemps.begin(), mytemps.end());
@@ -455,7 +441,7 @@ int DepthCalculator::ComputeTailDepth() {
 
 	int TailDepth = -1;
 
-	double t2;
+	double DeltaT, t1, t2;
 
 	std::vector<std::vector<double> > depthsAndTemps;
 
@@ -466,9 +452,16 @@ int DepthCalculator::ComputeTailDepth() {
 
 	for (int i = k; i > 0; i--) {
 
+		t1 = depthsAndTemps[i][1];
 		t2 = depthsAndTemps[i - 1][1];
-		if (t2 == 35.5)
+		if (t2 >= 34.5)
 			continue;
+
+		DeltaT = t1 - t2;
+		if((DeltaT <=-0.2)|| (DeltaT >=0.1))
+		{
+			continue;
+		}
 
 		TailDepth = i;
 

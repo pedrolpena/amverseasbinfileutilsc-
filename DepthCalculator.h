@@ -8,6 +8,7 @@
 #ifndef DEPTHCALCULATOR_H_
 #define DEPTHCALCULATOR_H_
 
+#define MAXINFPTS 30
 
 #include <vector>
 #include <cmath>
@@ -115,22 +116,19 @@ public:
 
 	std::vector<std::vector<double>> getDepthsAndTemperaturePointsInflectionPoints();
 
-    //===========stuff from jjvv_1=========
-
-
-    #define MAXINFPTS 30
-
-	int    ComputeLastDepth();
-    void   ApplyMedianFilter( std::vector <double> *s );
-    double GetMedian(std::vector<double> *pts);
-    int    ComputeTailDepth();
-    double GetSmoothTempAtDepth(int Depth, std::vector <double> *s);
-
-    //=====================================
-
-    DepthCalculator(XBTProfile &xBTProfile);
+	DepthCalculator(XBTProfile &xBTProfile);
 
 	virtual ~DepthCalculator();
+
+
+private:
+
+	void ApplyMedianFilter(std::vector<double> *s);
+	double GetMedian(std::vector<double> *pts);
+	int ComputeTailDepth();
+	double GetSmoothTempAtDepth(int Depth, std::vector<double> *s);
+
+
 };
 
 #endif /* DEPTHCALCULATOR_H_ */

@@ -172,8 +172,8 @@ std::string FormatConverter::getASCII() {
 
 
     for (std::vector<double> depthsAndTemp : depthsAndTemps) {
-    	double temp = std::floor(depthsAndTemp[0]*100.00 +.5)/100.00;
-    	sprintf(buf," %7.2f       %5.2f\n", temp, depthsAndTemp[1]);
+    	double depth = std::round(depthsAndTemp[0]*100.00)/100.00;
+    	sprintf(buf," %7.2f       %5.2f\n", depth, depthsAndTemp[1]);
     	tmp+= buf;
     } //end for
 

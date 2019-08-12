@@ -143,13 +143,16 @@ std::string FormatConverter::getASCII() {
     tmp += "Recorder Type                  | " + XBTRecorder::getRecorderDescription(xBTprofile->getRecorderType())
             + " (Code " + std::to_string(xBTprofile->getRecorderType()) + ")\n";
     tmp += "Wind Instrument Type           | " + std::to_string(xBTprofile->getWindInstrumentType()) + "\n";
-    tmp += "Wind Direction                 | " + std::to_string(xBTprofile->getWindDirection()) + "\n";
-    tmp += "Wind Speed (knots)             | " + std::to_string(xBTprofile->getWindSpeed()) + "\n";
+    sprintf(buf,"%04.1f",  xBTprofile->getWindDirection());
+    tmp += "Wind Direction                 | " + std::string(buf) + "\n";
+    sprintf(buf,"%04.1f",  xBTprofile->getWindSpeed());
+    tmp += "Wind Speed (knots)             | " + std::string(buf) + "\n";
     sprintf(buf,"%05.2f", xBTprofile->getDryBulbTemperature() - 273.15);
     tmp += "Dry Bulb Temperature (celsius) | " + std::string(buf) + "\n";
     tmp += "Current Measurement Method     | " + std::to_string(xBTprofile->getSeaSurfaceCurrentMeasurementMethod()) + "\n";
     tmp += "Current Direction              | " + std::to_string(xBTprofile->getSeaSurfaceCurrentDirection()) + "\n";
-    tmp += "Current Speed (knots)          | " + std::to_string(xBTprofile->getSeaSurfaceCurrentSpeed()) + "\n";
+    sprintf(buf,"%2.2f",  xBTprofile->getSeaSurfaceCurrentSpeed());
+    tmp += "Current Speed (knots)          | " + std::string(buf) + "\n";
     tmp += "Total Water Depth (meters)     | " + std::to_string(xBTprofile->getTotalWaterDepth()) + "\n";
     tmp += "XBT Launcher Type              | " + Launchers::getLauncherDescription(xBTprofile->getXBTLauncherType()) + "\n";
     tmp += "XBT Recorder Serial Number     | " + xBTprofile->getXBTRecorderSerialNumber() + "\n";
@@ -167,10 +170,11 @@ std::string FormatConverter::getASCII() {
     tmp += "Full Resolution Values\n";
     tmp += "   Depth       Temperature        \n";
 
-    char vals[30];
+
     for (std::vector<double> depthsAndTemp : depthsAndTemps) {
-    	sprintf(vals," %7.2f       %5.2f\n", depthsAndTemp[0], depthsAndTemp[1]);
-    	tmp+= vals;
+    	double temp = std::floor(depthsAndTemp[0]*100.00 +.5)/100.00;
+    	sprintf(buf," %7.2f       %5.2f\n", temp, depthsAndTemp[1]);
+    	tmp+= buf;
     } //end for
 
     return tmp;

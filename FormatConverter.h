@@ -20,6 +20,8 @@
 #include "XBTRecorder.h"
 #include "Launchers.h"
 #include "Agency.h"
+#include "PressureCalculator.h"
+#include "SoundSpeedInSeaWater.h"
 
 #ifndef FORMATCONVERTER_H_
 #define FORMATCONVERTER_H_
@@ -41,6 +43,16 @@ public:
      */
     std::string getASCII();
 
+    /**
+     * This method returns a String containing the xBTprofile information emulating
+     * the Sippican Export Data Format (EDF).
+     *
+     * @param fileName The filename to display.
+     * @param salinity The salinty of the area where the measurement was made.
+     * @return This method returns a String containing the xBTprofile
+     * information emulating the Sippican Export Data Format (EDF).
+     */
+    std::string getASCIIEDF(std::string fileName,double salinity);
     std::string decimalDegreesLatToDMSAOML(double lat);
     std::string decimalDegreesLonToDMSAOML(double lon);
     std::string decimalDegreesLatToDMSEDF(double lat);

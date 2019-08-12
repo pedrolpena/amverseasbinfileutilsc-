@@ -180,3 +180,95 @@ std::string FormatConverter::getASCII() {
     return tmp;
 
 }
+
+
+/**
+ * This method returns a String containing the xBTprofile information emulating
+ * the Sippican Export Data Format (EDF).
+ *
+ * @param fileName The filename to display.
+ * @param salinity The salinty of the area where the measurement was made.
+ * @return This method returns a String containing the xBTprofile
+ * information emulating the Sippican Export Data Format (EDF).
+ */
+std::string FormatConverter::getASCIIEDF(std::string fileName, double salinity) {
+
+	std::vector<std::vector<double>> depthsAndTemps;               //array of doubles that holds depths & temperature measurements
+    DepthCalculator *dc = new DepthCalculator(*xBTprofile);
+    depthsAndTemps = dc->getDepthsAndTemperaturePoints();
+    char *buf = new char();
+    std::string tmp = "";
+
+    tmp += "// Amverseas EXPORT DATA FILE  (EDF)\n";
+    tmp += "// File Information\n";
+    tmp += "Raw Data Filename:  " + fileName + "\n";
+    tmp += "// System Information\n";
+    tmp += "Units            :  Metric\n";
+    tmp += "// Probe Information\n";
+    tmp += "Probe Type       :  " + XBTProbe::getProbeDescription(xBTprofile->getInstrumentType()) + "\n";
+    sprintf(buf,"%04.1f",XBTProbe::getMaxDepth(xBTprofile->getInstrumentType()));
+    tmp += "Terminal Depth   :  " + std::string(buf) + " m\n";
+    tmp += "Depth Equation   :  Standard\n";
+    tmp += "Depth Coeff. 1   :  0.0\n";
+    sprintf(buf,"%f", XBTProbe::getCoefficientA(xBTprofile->getInstrumentType()));
+    tmp += "Depth Coeff. 2   :  " + std::string(buf) + "\n";
+    sprintf(buf,"%f", XBTProbe::getCoefficientB(xBTprofile->getInstrumentType()) * .001);
+    tmp += "Depth Coeff. 3   :  " + std::string(buf) + "\n";
+    tmp += "Depth Coeff. 4   :  0.0\n";
+    tmp += "// Launch Information\n";
+    tmp += "Num Info Fields  :  6\n";
+    sprintf(buf,"%02d/%02d/%04d\n",
+            xBTprofile->getMonth(),
+            xBTprofile->getDay(),
+            xBTprofile->getYear() );
+    tmp += "Date of Launch   :  " + std::string(buf);
+    sprintf(buf,"%02d:%02d:%02d\n",
+            xBTprofile->getHour(),
+            xBTprofile->getMinute(), 0);
+    tmp += "Time of Launch   :  " + std::string(buf);
+    tmp += "Sequence Number  :  " + std::to_string(xBTprofile->getSequenceNumber()) + "\n";;
+    tmp += "Latitude         :  " + decimalDegreesLatToDMSEDF(xBTprofile->getLatitude()) + "\n";;
+    tmp += "Longitude        :  " + decimalDegreesLonToDMSEDF(xBTprofile->getLongitude()) + "\n";;
+    tmp += "Serial Number    :  " + xBTprofile->getXBTRecorderSerialNumber() + "\n";
+    tmp += "// Memo\n";
+    tmp += xBTprofile->getShipName() + "\n";;
+    tmp += "// Hardware\n";
+    tmp += "Recorder Device  : " + XBTRecorder::getRecorderDescription(xBTprofile->getRecorderType()) + "\n";
+    tmp += "// Information - XBT\n";
+    sprintf(buf,"%5.2f", salinity);
+    tmp += "Salinity          :  " + std::string(buf) + " ppt\n";
+    tmp += "// Post-Processing\n";
+    tmp += "Operations       :  None\n";
+    tmp += "// Data Fields\n";
+    tmp += "Num Data Fields   :  5\n";
+    tmp += "Field1            :  Time (sec)\n";
+    tmp += "Field2            :  Resistance (ohms)\n";
+    tmp += "Field3            :  Depth (m)\n";
+    tmp += "Field4            :  Temperature (C)\n";
+    tmp += "Field5            :  Sound Velocity (m/s)\n";
+    tmp += "// Data\n";
+    PressureCalculator pc;
+    SoundSpeedInSeaWater ss;
+    double pressure;
+    double sv ;
+    double temp;
+    double depth;
+    double time = 0.0;
+    std::vector<double> resistances = xBTprofile->getResistancePoints();
+    double resistance;
+    for (unsigned int i = 0; i < depthsAndTemps.size() ; i++) {
+        depth = dc->getMeasurementDepth(i-1);
+        temp = depthsAndTemps[i][1];
+        pressure = pc.getPressure(depth, xBTprofile->getLatitude());
+        time = i / XBTRecorder::getRecorderFrequency(xBTprofile->getInstrumentType());
+        resistance = -9999.99;
+        if (!resistances.empty() && resistances.size() > i )
+        resistance =resistances[i] ;
+        sv = ss.getSoundSpeedChenMillero(pressure, salinity, temp);
+        sprintf(buf,"%5.1f %8.3f    %7.2f   %5.2f   %7.2f",time,resistance, depth, temp , sv);
+        tmp += std::string(buf)+"\n";
+    } //end for
+    return tmp;
+
+
+}

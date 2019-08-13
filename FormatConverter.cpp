@@ -95,7 +95,7 @@ std::string FormatConverter::getASCII() {
     std::vector<std::vector<double>> depthsAndTemps;  //array of doubles that holds depths & temperature measurements
     DepthCalculator *dc = new DepthCalculator(*xBTprofile);
     depthsAndTemps = dc->getDepthsAndTemperaturePoints();
-    char *buf = new char();
+    char buf[120];
 
     tmp += "Call Sign                      | " + xBTprofile->getWMOId() + "\n";
     tmp += "Latitude                       | " + decimalDegreesLatToDMSAOML(xBTprofile->getLatitude()) + "\n";
@@ -196,7 +196,7 @@ std::string FormatConverter::getASCIIEDF(std::string fileName, double salinity) 
 	std::vector<std::vector<double>> depthsAndTemps;               //array of doubles that holds depths & temperature measurements
     DepthCalculator *dc = new DepthCalculator(*xBTprofile);
     depthsAndTemps = dc->getDepthsAndTemperaturePoints();
-    char *buf = new char();
+    char buf[120];
     std::string tmp = "";
 
     tmp += "// Amverseas EXPORT DATA FILE  (EDF)\n";

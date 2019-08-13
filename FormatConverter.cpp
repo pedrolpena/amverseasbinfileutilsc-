@@ -198,6 +198,7 @@ std::string FormatConverter::getASCIIEDF(std::string fileName, double salinity) 
     depthsAndTemps = dc->getDepthsAndTemperaturePoints();
     char buf[120];
     std::string tmp = "";
+    fileName = fileName.substr(fileName.find_last_of("/\\") + 1); // extract filename from path
 
     tmp += "// Amverseas EXPORT DATA FILE  (EDF)\n";
     tmp += "// File Information\n";

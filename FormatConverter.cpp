@@ -177,6 +177,7 @@ std::string FormatConverter::getASCII() {
     	tmp+= buf;
     } //end for
 
+    delete dc;
     return tmp;
 
 }
@@ -269,6 +270,7 @@ std::string FormatConverter::getASCIIEDF(std::string fileName, double salinity) 
         sprintf(buf,"%5.1f %8.3f    %7.2f   %5.2f   %7.2f",time,resistance, depth, temp , sv);
         tmp += std::string(buf)+"\n";
     } //end for
+    delete dc;
     return tmp;
 
 
@@ -277,15 +279,22 @@ std::string FormatConverter::getASCIIEDF(std::string fileName, double salinity) 
 std::string FormatConverter::getASCIINDC() {
 
 	std::string tmp = "";
-
-
-
+	DepthCalculator *dc = new DepthCalculator(*xBTprofile);
+	std::vector<std::vector<double>> inflectionPoints = dc->getDepthsAndTemperaturePointsInflectionPoints();
+	std::vector<std::vector<double>> twoMeterResolution = dc->getDepthsAndTemperaturePointsTwoMeterResolution();
+	std::vector<std::vector<double>> fullResolution = dc->getDepthsAndTemperaturePoints();
 	tmp += " SEAS Version:  "  + std::to_string(xBTprofile->getSeasVersion()) + "\n";
 	tmp += " Ship Name: "      + xBTprofile->getShipName() + "\n";
 	tmp += " Call Sign: "      + xBTprofile->getWMOId() + "\n";
 	tmp += " Lloyds Number:  " + std::to_string(xBTprofile->getLloyds()) + "\n";
-	tmp += " Date/Time(dd/mm/yyyy): ";
-	tmp += " Latitude(ddd.ddd): " + decimalDegreesLonToDMSAOML(xBTprofile->getLatitude()) + "\n";
+    sprintf(buf,"%02d/%02d/%04d %02d:%02d GMT\n",
+            xBTprofile->getDay(),
+            xBTprofile->getMonth(),
+            xBTprofile->getYear(),
+			xBTprofile->getHour(),
+			xBTprofile->getMinute());
+	tmp += " Date/Time(dd/mm/yyyy): " + std::string(buf);
+	tmp += " Latitude(ddd.ddd): " + std::string("0") + decimalDegreesLatToDMSAOML(xBTprofile->getLatitude()) + "\n";
 	tmp += " Longitude(ddd.ddd): " + decimalDegreesLonToDMSAOML(xBTprofile->getLongitude()) + "\n";
 	tmp += " Probe Type: " + XBTProbe::getProbeDescription(xBTprofile->getInstrumentType()) + "\n";
 	tmp += " Probe Code:  " + std::to_string(xBTprofile->getInstrumentType()) + "\n";
@@ -294,16 +303,18 @@ std::string FormatConverter::getASCIINDC() {
 	tmp += " Recorder Code:  " + std::to_string(xBTprofile->getRecorderType()) + "\n";
 	sprintf(buf,"%05.2f", xBTprofile->getDryBulbTemperature() - 273.15);
 	tmp += " Dry Bulb Temp:  " + std::string(buf) + "\n";
-	tmp += " Wind Instr Type: " + std::to_string(xBTprofile->getWindInstrumentType()) + "\n";
+	tmp += " Wind Instr Type: " + WindInstrument::getInstrumentDescription(xBTprofile->getWindInstrumentType()) + "\n";
 	sprintf(buf,"%04.1f",  xBTprofile->getWindSpeed());
 	tmp += " Wind Speed: " + std::string(buf) + "\n";
 	sprintf(buf,"%04.1f",  xBTprofile->getWindDirection());
 	tmp += " Wind Dir:   " + std::string(buf) + "\n";
-	tmp += " Current Measurement Method: " + std::to_string(xBTprofile->getSeaSurfaceCurrentMeasurementMethod()) + "\n";
+	tmp += " Current Measurement Method: " +
+			SurfaceCurrentInstrument::getInstrumentDescription(
+					xBTprofile->getSeaSurfaceCurrentMeasurementMethod()) + "\n";
 	sprintf(buf,"%2.2f",  xBTprofile->getSeaSurfaceCurrentSpeed());
 	tmp += " Current Speed: " + std::string(buf) + "\n";
 	tmp += " Current Dir:   " + std::to_string(xBTprofile->getSeaSurfaceCurrentDirection()) + "\n";
-	tmp += " Bottom Depth:    " + std::to_string(xBTprofile->getTotalWaterDepth()) + "\n";
+	tmp += " Bottom Depth:    " + std::to_string(xBTprofile->getTotalWaterDepth()) + " M\n";
 
     sprintf(buf,"%x", xBTprofile->getUniqueTag());
     std::string s = std::string(buf);
@@ -312,7 +323,7 @@ std::string FormatConverter::getASCIINDC() {
 		s[i]=std::toupper(s[i]);
 	}
 	tmp += " SEAS ID: " + s + "\n";
-	sprintf(buf,"%d", (int) xBTprofile->getShipSpeed());
+	sprintf(buf,"%4.2f",  xBTprofile->getShipSpeed() * 1.94384);
 	tmp += " Ship Speed at Launch (knots): " + std::string(buf) + "\n";
 	sprintf(buf,"%02d", (int) xBTprofile->getShipDirection());
 	tmp += " Ship Direction at Launch (Degrees):   " + std::string(buf) + "\n";
@@ -339,8 +350,61 @@ std::string FormatConverter::getASCIINDC() {
 	tmp += " Ship Rider Email: " + xBTprofile->getRiderEmails() + "\n";
 	tmp += " Ship Rider Telephone Number: " + xBTprofile->getRiderPhones() + "\n";
 
+	if (inflectionPoints.size() > 0) {
+		tmp += "\n\nINFPTS: " + std::to_string(inflectionPoints.size()) ;
+
+		int count = 0;
+		for (std::vector<double> inflectionPoint : inflectionPoints) {
+			int depth = (int) (inflectionPoint[0] * 10);
+			int temp = (int) (inflectionPoint[1] * 100);
+			sprintf(buf, " %4d %4d", depth, temp);
+
+			if ((count) % 8 != 0) {
+				tmp = tmp + buf;
+			} else {
+				tmp = tmp + "\n" + buf + " ";
+			}
+			count++;
+		} //end for
+	}
+
+	if (twoMeterResolution.size() > 0) {
+		tmp += "\n\n\nTWOMETER: " + std::to_string(twoMeterResolution.size()) ;
+
+		int count = 0;
+		for (std::vector<double> twoMeterProfile : twoMeterResolution) {
+			int depth = (int) (twoMeterProfile[0] * 10);
+			int temp = (int) (twoMeterProfile[1] * 100);
+			sprintf(buf, " %4d %4d", depth, temp);
+
+			if ((count) % 8 != 0) {
+				tmp = tmp + buf;
+			} else {
+				tmp = tmp + "\n" + buf + " ";
+			}
+			count++;
+		} //end for
+	}
+
+	if (fullResolution.size() > 0) {
+		tmp += "\n\n\nXBT: " + std::to_string(fullResolution.size()) ;
+
+		int count = 0;
+		for (std::vector<double> fullProfile : fullResolution) {
+			int temp = (int) (fullProfile[1] * 100);
+			sprintf(buf, "%4d", temp);
+
+			if ((count) % 20 != 0) {
+				tmp = tmp + buf;
+			} else {
+				tmp = tmp + "\n" + buf ;
+			}
+			count++;
+		} //end for
+	}
 
 
+	delete dc;
 	return tmp;
 
 }

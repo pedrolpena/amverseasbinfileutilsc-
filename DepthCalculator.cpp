@@ -460,7 +460,7 @@ int DepthCalculator::ComputeTailDepth() {
 	TailDepth = depthsAndTemps.size();
 	int k = TailDepth;
 
-	for (int i = k; i > 0; i--) {
+	for (int i = k-1; i >= 0; i--) {
 
 		t1 = depthsAndTemps[i][1];
 		t2 = depthsAndTemps[i - 1][1];

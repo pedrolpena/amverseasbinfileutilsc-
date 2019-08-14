@@ -22,6 +22,9 @@
 #include "Agency.h"
 #include "PressureCalculator.h"
 #include "SoundSpeedInSeaWater.h"
+#include "SurfaceCurrentInstrument.h"
+#include "WindInstrument.h"
+
 
 #ifndef FORMATCONVERTER_H_
 #define FORMATCONVERTER_H_
@@ -32,6 +35,7 @@ public:
     XBTProfile *xBTprofile;
     std::string prettyLat;
     std::string prettyLon;
+    char buf[120];
 
 
     /**
@@ -52,6 +56,7 @@ public:
      * @return This method returns a String containing the xBTprofile
      * information emulating the Sippican Export Data Format (EDF).
      */
+    std::string getASCIINDC();
     std::string getASCIIEDF(std::string fileName,double salinity);
     std::string decimalDegreesLatToDMSAOML(double lat);
     std::string decimalDegreesLonToDMSAOML(double lon);

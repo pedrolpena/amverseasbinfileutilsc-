@@ -157,8 +157,9 @@ std::vector<std::vector<double> > DepthCalculator::getDepthsAndTemperaturePoints
 	//interpoalte
 	mlinterp::interp(
 
-	inputSize, finalDepth, inputTemps, oneMeterTemps, inputDepths,
-			oneMeterDepths);
+	  inputSize,   finalDepth,
+	 inputTemps,   oneMeterTemps,
+	inputDepths,   oneMeterDepths);
 
 	//copy results to a 2 dimensional vector;
 	for (int i = 0; i < finalDepth; i++) {

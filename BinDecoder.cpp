@@ -762,7 +762,7 @@ double BinDecoder::getSeaTemperature() {
     int mt = getNewMessageType();
     int start = XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::SEA_SURFACE_TEMPERATURE,mt)[0];
     int end = XBTProfileDataRanges::getDataLocation(XBTProfileDataRanges::SEA_SURFACE_TEMPERATURE,mt)[1];
-    return (toInteger(start, end) - 400.00) / 100.00;
+    return (toInteger(start, end) - 400.00) / 100.00 +.005;
 }
 /**
  * <strong>(FXY48201)</strong>-This method returns the version of Amverseas
@@ -855,7 +855,7 @@ std::vector<double> BinDecoder::getTemperaturePoints() {
     std::vector<double> temps(points,0);
     int counter = 0;
     for (int i = start; i < start + points * 12; i += 12) {
-        temps[counter] = (toInteger(i, i + 11) - 400.00) / 100.00;
+        temps[counter] = ((double)toInteger(i, i + 11) - 400.00) / 100.00 + .000;
         counter++;
 
     }//end for

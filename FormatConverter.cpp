@@ -172,7 +172,7 @@ std::string FormatConverter::getASCII() {
 
 
     for (std::vector<double> depthsAndTemp : depthsAndTemps) {
-    	double depth = std::round(depthsAndTemp[0]*100.00)/100.00;
+    	double depth = depthsAndTemp[0];
     	sprintf(buf," %7.2f       %5.2f\n", depth, depthsAndTemp[1]);
     	tmp+= buf;
     } //end for
@@ -374,7 +374,7 @@ std::string FormatConverter::getASCIINDC() {
 		int count = 0;
 		for (std::vector<double> twoMeterProfile : twoMeterResolution) {
 			int depth = (int) (twoMeterProfile[0] * 10);
-			int temp = (int) (twoMeterProfile[1] * 100);
+			int temp = (int) (twoMeterProfile[1] * 100 + .5);
 			sprintf(buf, " %4d %4d", depth, temp);
 
 			if ((count) % 8 != 0) {
@@ -391,7 +391,7 @@ std::string FormatConverter::getASCIINDC() {
 
 		int count = 0;
 		for (std::vector<double> fullProfile : fullResolution) {
-			int temp = (int) (fullProfile[1] * 100);
+			int temp = (int) (fullProfile[1] * 100 + .5);
 			sprintf(buf, "%4d", temp);
 
 			if ((count) % 20 != 0) {

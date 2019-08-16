@@ -124,6 +124,8 @@ public:
      */
 	std::vector<std::vector<double>> getDepthsAndTemperaturePointsInflectionPoints();
 
+	std::vector<std::vector<double>> getInflectionPoints(double prec);
+
 	DepthCalculator(XBTProfile &xBTProfile);
 
 	virtual ~DepthCalculator();

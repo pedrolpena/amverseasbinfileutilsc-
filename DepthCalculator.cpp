@@ -511,3 +511,93 @@ double DepthCalculator::GetSmoothTempAtDepth(int Depth,std::vector <double> *s) 
 	}
 	return (float) RetTemp;
 }
+
+std::vector<std::vector<double> > DepthCalculator::getInflectionPoints( double prec) {
+	std::vector<std::vector<double> > depthsAndTempsFull = getDepthsAndTemperaturePoints();
+	std::vector<std::vector<double> > depthsAndTemps;
+	//std::vector<std::vector<double> > depthsAndTemps = getDepthsAndTemperaturePointsOneMeterResolution();
+	std::vector<std::vector<double> > infPoints;
+	std::vector< double > infPoint;
+
+	double  Dk0,Dk1,Dk2,Tk0,Tk1,Tk2,ipCurrent=0,ipPrevious=0;
+
+
+	//apply smoothing with a window size of 5
+
+	std::vector<std::vector<double> > depthsAndTempsFiltered(depthsAndTempsFull.size(),std::vector<double>(2));
+	std::vector<double > depths(5);
+	std::vector<double > temps(5);
+
+//	depthsAndTempsFiltered[0][0] = depthsAndTempsFull[0][0];
+//	depthsAndTempsFiltered[0][1] = depthsAndTempsFull[0][1];
+
+
+	for (unsigned int i = 0; i < depthsAndTempsFiltered.size() - 5 ; i++) {
+
+//		depthsAndTempsFiltered[i + 1][0] = (depthsAndTempsFiltered[i + 0 ][ 0 ] + depthsAndTempsFull[i + 1 ][ 0 ]) / 2.0;
+//		depthsAndTempsFiltered[i + 1][1] = (depthsAndTempsFiltered[i + 0 ][ 1 ]  + depthsAndTempsFull[i + 1 ][ 1 ]) / 2.0;
+
+//		depths.push_back(depthsAndTempsFull[ i + 0 ][0]);
+//		depths.push_back(depthsAndTempsFull[ i + 1 ][0]);
+//		depths.push_back(depthsAndTempsFull[ i + 2 ][0]);
+//		depths.push_back(depthsAndTempsFull[ i + 3 ][0]);
+//		depths.push_back(depthsAndTempsFull[ i + 4 ][0]);
+
+		temps.push_back(depthsAndTempsFull[ i + 0 ][1]);
+		temps.push_back(depthsAndTempsFull[ i + 1 ][1]);
+		temps.push_back(depthsAndTempsFull[ i + 2 ][1]);
+		temps.push_back(depthsAndTempsFull[ i + 3 ][1]);
+		temps.push_back(depthsAndTempsFull[ i + 4 ][1]);
+
+		std::sort(temps.begin(),temps.end());
+
+		depthsAndTempsFiltered[i][1] = temps[2];
+		depthsAndTempsFiltered[i][0] = depthsAndTempsFull[i][0];
+		temps.clear();
+
+
+
+
+	}
+
+
+	for (unsigned int k = 0; k < depthsAndTempsFiltered.size() - 2; k++) {
+
+		Dk0 = depthsAndTempsFiltered[k][0],
+		Dk1 = depthsAndTempsFiltered[k + 1][0],
+		Dk2 = depthsAndTempsFiltered[k + 2][0],
+		Tk0 = depthsAndTempsFiltered[k][1],
+		Tk1 = depthsAndTempsFiltered[k + 1][1],
+		Tk2 = depthsAndTempsFiltered[k + 2][1];
+
+
+
+		if( ( Tk0 - Tk1 ) *  ( Tk1 - Tk2 ) !=0 /*&& std::abs( Tk0 - Tk1 ) > prec && std::abs( Tk1 - Tk2 ) > prec*/){
+
+			ipCurrent = ( Dk0 - Dk1 )/( Tk0 - Tk1 )*( Tk0 - Tk1 ) - ( Dk1 - Dk2 )/( Tk0 - Tk1 )*( Tk1 - Tk2 );
+
+			if (ipCurrent * ipPrevious < 0){
+
+				infPoint.push_back(Dk0);
+				infPoint.push_back(Tk0);
+				infPoints.push_back(infPoint);
+				infPoint.clear();
+			}
+
+			ipPrevious = ipCurrent;
+
+		}
+
+
+
+	}
+
+
+
+	// remove values that are the same
+
+
+
+
+	return infPoints;
+}

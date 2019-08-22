@@ -219,6 +219,9 @@ std::vector<std::vector<double> > DepthCalculator::getDepthsAndTemperaturePoints
  */
 std::vector<std::vector<double>> DepthCalculator::getDepthsAndTemperaturePointsInflectionPoints() {
 
+	return getInflectionPoints(getDepthsAndTemperaturePoints());
+
+	/*//pauls code
 	std::vector<std::vector<double>> Inflections;
 	std::vector<double> *smoothedPoints = new std::vector<double>(0);
 
@@ -381,6 +384,7 @@ std::vector<std::vector<double>> DepthCalculator::getDepthsAndTemperaturePointsI
 	} //end while
 
 	return Inflections;
+	*/
 }
 
 
@@ -531,7 +535,7 @@ std::vector<std::vector<double> > DepthCalculator::getInflectionPoints( std::vec
 	SLOPE0, // Trailing slope (velocity)
 	SLOPE1, // Leading slope (velocity)
 	accelerationCurrent,   //Current acceleration
-	accelerationPrevious;  //Previous acceleration
+	accelerationPrevious = 0;  //Previous acceleration
 
 
 
@@ -568,6 +572,7 @@ std::vector<std::vector<double> > DepthCalculator::getInflectionPoints( std::vec
 			accelerationCurrent = dD0/( dT0 * dT0 ) - dD1/( dT0 * dT1 );
 
 
+
 			/*
 			 * Since we are dealing with discrete points, there is no guarantee
 			 * that a point will match up exactly with a slope of 0. this means
@@ -576,7 +581,7 @@ std::vector<std::vector<double> > DepthCalculator::getInflectionPoints( std::vec
 			 * is looked at. The product will only be negative when direction
 			 * changes. In other words, concavity hasn't changed.
 			 * */
-			if (accelerationCurrent *accelerationPrevious  < 0 && SLOPE0 * SLOPE1 > 0){
+			if (accelerationCurrent *accelerationPrevious  < 0 && SLOPE0 * SLOPE1 > 0 && infPoints.size() < MAXINFPTS){
 
 				infPoint.push_back(Dk1);
 				infPoint.push_back(Tk1);

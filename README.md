@@ -43,3 +43,11 @@ For a Debug version
 cd Debug
 make
 ```
+
+The generated library will be in the directory you ran the make command from.
+```
+libamverseasbinfileutils.so
+```
+
+
+

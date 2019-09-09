@@ -16,6 +16,7 @@ constexpr int MESSAGE_TYPE_4=4;
 MessageType::MessageType() {
 	// TODO Auto-generated constructor stub
 
+
 }
 
 MessageType::~MessageType() {

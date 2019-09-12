@@ -74,3 +74,15 @@ To compile issue the make command
 make
 ```
 
+
+To compile under Windows, make sure you have Cmake, Ninja and MinGW installed and in the path.
+
+```windows
+mkdir build
+cd build
+mkdir win
+cd win
+cmake -G"Ninja" ..\..\
+ninja
+```
+Should have created libxbtbinfileutils.dll and libxbtbinfileutils.dll.a

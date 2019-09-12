@@ -53,7 +53,13 @@ libxbtbinfileutils.so
 
 Alternatively you can use cmake to create your preffered build environment.
 
-Create a seperate make project, create a build directory and a unix sub directory ane run cmake.
+Install cmake
+```bash
+sudo apt-get update
+sudo apt-get install cmake
+```
+
+Create a seperate make project, create a build directory and a unix sub directory and run cmake.
 
 ```bash
 mkdir -p build/unix
@@ -63,5 +69,8 @@ Now you can create a makefile project
 ```bash
 cmake -G"Unix Makefiles" ../../
 ```
-
+To compile issue the make command
+```bash
+make
+```
 

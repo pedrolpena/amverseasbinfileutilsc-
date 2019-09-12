@@ -22,8 +22,10 @@ DOC or the United States Government.
 -----------------------------------
 **COMPILING AND USING THE LIBRARY**
 ------------------------------------
+This project was written using elcipse Version: 2019-06 (4.12.0) so you should be able to make changes 
+pretty easily this way. The makefiles that are in the Release and Debug directories were created by eclipse.
 
-To compile under Ubuntu 18.04
+To compile under Ubuntu 18.04 without eclipse.
 install make and g++
 ```bash
 sudo apt-get update
@@ -49,6 +51,17 @@ The generated library will be in the directory you ran the make command from.
 libxbtbinfileutils.so
 ```
 
+Alternatively you can use cmake to create your preffered build environment.
 
+Create a seperate make project, create a build directory and a unix sub directory ane run cmake.
+
+```bash
+mkdir -p build/unix
+cd build/unix
+```
+Now you can create a makefile project
+```bash
+cmake -G"Unix Makefiles" ../../
+```
 
 

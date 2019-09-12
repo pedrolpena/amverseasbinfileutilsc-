@@ -25,7 +25,7 @@ std::string FormatConverter::decimalDegreesLatToDMSAOML(double lat) {
     if (lat < 0) {
         dir = "S";
     }//end if
-    char* buf;
+    char buf[10];
     sprintf(buf,"%02d %05.2f " ,x ,y);
     std::string out = buf + dir;
     return out;
@@ -40,7 +40,7 @@ std::string FormatConverter::decimalDegreesLonToDMSAOML(double lon) {
     if (lon < 0) {
         dir = "W";
     }//end if
-    char* buf;
+    char buf[11];
     sprintf(buf,"%03d %05.2f " ,x ,y);
     std::string out = buf + dir;
     return out;
@@ -58,7 +58,7 @@ std::string FormatConverter::decimalDegreesLatToDMSEDF(double lat) {
     if (lat < 0) {
         dir = "S";
     }//end if
-    char* buf;
+    char buf[11];
     sprintf(buf,"%02d %07.4f" ,x ,y);
     std::string out = buf + dir;
     return out;
@@ -74,7 +74,7 @@ std::string FormatConverter::decimalDegreesLonToDMSEDF(double lon) {
     if (lon < 0) {
         dir = "W";
     }//end if
-    char* buf;
+    char buf[12];
     sprintf(buf,"%03d %07.4f" ,x ,y);
     std::string out = buf + dir;
     return out;

@@ -79,7 +79,7 @@ To install
 sudo make install
 ```
 The development headers will be installed in "/usr/local/include/xbtbinfileutils" and the library
-will be install in "/usr/local/lib/xbtbinfileutils/"
+will be installed in "/usr/local/lib/xbtbinfileutils/"
 
 To uninstall issue the following command
 ```bash
@@ -103,7 +103,7 @@ To install open a command prompt with Admin privledges.
 ninja install
 ```
 The development headers will be installed in "C:/Program Files (x86)/xbtbinfileutils/include/xbtbinfileutils" or
-"C:/Program Files/xbtbinfileutils/include/xbtbinfileutils" and the library willbe installed in "C:/Program Files (x86)/xbtbinfileutils/lib/xbtbinfileutils" or "C:/Program Files/xbtbinfileutils/lib/xbtbinfileutils"
+"C:/Program Files/xbtbinfileutils/include/xbtbinfileutils" and the library will be installed in "C:/Program Files (x86)/xbtbinfileutils/lib/xbtbinfileutils" or "C:/Program Files/xbtbinfileutils/lib/xbtbinfileutils"
 
 To uninstall issue the following command
 ```windows

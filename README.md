@@ -74,6 +74,17 @@ To compile issue the make command
 make
 ```
 
+To install 
+```bash
+sudo make install
+```
+The development headers will be installed in "/usr/local/include/xbtbinfileutils" and the library
+will be install in "/usr/local/lib/xbtbinfileutils/"
+
+To uninstall issue the following command
+```bash
+sudo make uninstall
+```
 
 To compile under Windows, make sure you have Cmake, Ninja and MinGW installed and in the path.
 
@@ -86,3 +97,15 @@ cmake -G"Ninja" ..\..\
 ninja
 ```
 Should have created libxbtbinfileutils.dll and libxbtbinfileutils.dll.a
+
+To install open a command prompt with Admin privledges.
+```windows
+ninja install
+```
+The development headers will be installed in "C:/Program Files (x86)/xbtbinfileutils/include/xbtbinfileutils" or
+"C:/Program Files/xbtbinfileutils/include/xbtbinfileutils" and the library willbe installed in "C:/Program Files (x86)/xbtbinfileutils/lib/xbtbinfileutils" or "C:/Program Files/xbtbinfileutils/lib/xbtbinfileutils"
+
+To uninstall issue the following command
+```windows
+ninja uninstall
+```

@@ -93,7 +93,7 @@ mkdir build
 cd build
 mkdir win
 cd win
-cmake -G"Ninja" ..\..\
+cmake -G"Ninja" ..\
 ninja
 ```
 Should have created libxbtbinfileutils.dll and libxbtbinfileutils.dll.a

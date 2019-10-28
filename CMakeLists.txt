@@ -17,9 +17,13 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 # Install library
 install(TARGETS ${PROJECT_NAME} DESTINATION
 
-                        ARCHIVE DESTINATION lib/${PROJECT_NAME}
-                        LIBRARY DESTINATION lib/${PROJECT_NAME}
-                        RUNTIME DESTINATION bin/${PROJECT_NAME}
+#                        ARCHIVE DESTINATION lib/${PROJECT_NAME}
+#                        LIBRARY DESTINATION lib/${PROJECT_NAME}
+#                        RUNTIME DESTINATION bin/${PROJECT_NAME}
+                        
+                        ARCHIVE DESTINATION lib
+                        LIBRARY DESTINATION lib
+                        RUNTIME DESTINATION bin
 )
 
 

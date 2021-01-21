@@ -62,6 +62,8 @@ public:
     std::string decimalDegreesLonToDMSAOML(double lon);
     std::string decimalDegreesLatToDMSEDF(double lat);
     std::string decimalDegreesLonToDMSEDF(double lon);
+    uint32_t computeCRC32(char *buf, uint32_t len);
+    std::string intToHexString(int int1);
 
 
 	FormatConverter(XBTProfile &xBTprofile);

@@ -53,7 +53,7 @@ libxbtbinfileutils.so
 
 Alternatively you can use cmake to create your preffered build environment.
 
-Install cmake
+Install cmake.
 ```bash
 sudo apt-get update
 sudo apt-get install cmake
@@ -65,7 +65,7 @@ Create a seperate make project, create a build directory and a unix sub director
 mkdir -p build/unix
 cd build/unix
 ```
-Now you can create a makefile project
+Now you can create a makefile project.
 ```bash
 cmake -G"Unix Makefiles" ../../
 ```
@@ -79,9 +79,9 @@ To install
 sudo make install
 ```
 The development headers will be installed in "/usr/local/include/xbtbinfileutils" and the library
-will be installed in "/usr/local/lib/xbtbinfileutils/"
+will be installed in "/usr/local/lib/xbtbinfileutils/".
 
-To uninstall issue the following command
+To uninstall issue the following command.
 ```bash
 sudo make uninstall
 ```

@@ -25,7 +25,7 @@ DOC or the United States Government.
 This project was written using elcipse Version: 2019-06 (4.12.0) so you should be able to make changes 
 pretty easily this way. The makefiles that are in the Release and Debug directories were created by eclipse.
 
-To compile under Ubuntu 18.04 without eclipse.
+To compile under debian bases linux without eclipse.
 install make and g++
 ```bash
 sudo apt update

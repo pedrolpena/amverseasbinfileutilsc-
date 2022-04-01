@@ -28,46 +28,20 @@ pretty easily this way. The makefiles that are in the Release and Debug director
 To compile under Ubuntu 18.04 without eclipse.
 install make and g++
 ```bash
-sudo apt-get update
-sudo apt-get install make g++
-```
-
-For a Release version
-
-```bash
-cd Release
-make
-```
-
-For a Debug version
-
-```bash
-cd Debug
-make
-```
-
-The generated library will be in the directory you ran the make command from.
-```
-libxbtbinfileutils.so
-```
-
-Alternatively you can use cmake to create your preffered build environment.
-
-Install cmake.
-```bash
-sudo apt-get update
-sudo apt-get install cmake
+sudo apt update
+sudo apt install make cmake g++
 ```
 
 Create a seperate make project, create a build directory and a unix sub directory and run cmake.
 
 ```bash
+cd xbtbinfileutils
 mkdir -p build/unix
 cd build/unix
 ```
 Now you can create a makefile project.
 ```bash
-cmake -G"Unix Makefiles" ../../
+cmake ../../
 ```
 To compile issue the make command
 ```bash

@@ -36,8 +36,8 @@ Create a seperate make project, create a build directory and a unix sub director
 
 ```bash
 cd xbtbinfileutils
-mkdir -p build/unix
-cd build/unix
+mkdir -p build
+cd build
 ```
 Now you can create a makefile project.
 ```bash

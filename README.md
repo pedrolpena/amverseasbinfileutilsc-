@@ -26,12 +26,15 @@ This project was written using elcipse Version: 2019-06 (4.12.0) so you should b
 pretty easily this way. The makefiles that are in the Release and Debug directories were created by eclipse.
 
 To compile under debian bases linux without eclipse.
-install make and g++
+install make cmake git and g++
 ```bash
 sudo apt update
-sudo apt install make cmake g++
+sudo apt install make cmake git g++
 ```
-
+Clone the repository
+```bash
+git clone https://github.com/pedrolpena/xbtbinfileutils.git
+```
 Create a seperate make project, create a build directory and a unix sub directory and run cmake.
 
 ```bash
